@@ -1,15 +1,20 @@
 ﻿using MqttMessageHandlerLibrary;
 using System;
+using Microsoft.Extensions.Configuration;
 
 namespace MqttMessageApp
 {
     internal class Program
     {
-        private const string BrokerAdress = "broker.hivemq.com";
-
         static void Main(string[] args)
         {
-            var mqttMessageSender = new MqttMessageSender(BrokerAdress);
+            IConfiguration config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            string brokerAddress = config.GetSection("MqttConfig")["BrokerAddress"];
+
+            var mqttMessageSender = new MqttMessageSender(brokerAddress);
 
             var mqttMessage = new MqttMessage
             {
@@ -18,7 +23,6 @@ namespace MqttMessageApp
             };
 
             mqttMessageSender.SendMessage(mqttMessage);
-            mqttMessageSender.Disconnect();
 
             Console.WriteLine("Press any key to exit.");
             Console.ReadLine();
